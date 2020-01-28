@@ -81,6 +81,20 @@ public:
     virtual InputEvent read() = 0;
 };
 
+class InputFunc : public InputSource {
+public:
+    InputFunc(std::function<InputEvent(void)> f) : InputSource(), m_func(f) {}
+    InputFunc(std::function<InputEvent(void)> f, const char* name) : InputSource(name), m_func(f) {}
+    InputFunc(std::function<InputEvent(void)> f, const char* name, Task::State initialState) : InputSource(name, initialState), m_func(f) {}
+
+    InputEvent read() override {
+        return m_func();
+    }
+
+private:
+    std::function<InputEvent(void)> m_func;
+};
+
 class BufferedInputSource: public InputSource {
 public:
     BufferedInputSource() : InputSource() {}

@@ -54,7 +54,6 @@ PhotonTelemetry::loop()
 void
 PhotonTelemetry::handleEvent(const InputEvent &evt)
 {
-    m_lastEvent = evt;
     if (evt.intent == InputEvent::NetworkStatus) {
         onConnected();
     }
@@ -118,8 +117,17 @@ PhotonTelemetry::handleEvent(const InputEvent &evt)
         char buf[255];
         snprintf(buf, sizeof(buf), "{\"intent\": \"%s\", \"value\": %s}", sourceName, valueBuf);
         if (m_online) {
-            Log.info("Event: %s", buf);
-            Particle.publish("renderbug/event", buf, PRIVATE);
+            if (evt.intent != m_lastEvent.intent) {
+                if (m_duplicateEvents > 0) {
+                    Log.info("Suppressed reporting %d duplicate events.", m_duplicateEvents);
+                }
+                Log.info("Event: %s", buf);
+                m_duplicateEvents = 0;
+                m_lastEvent = evt;
+                Particle.publish("renderbug/event", buf, PRIVATE);
+            } else {
+                m_duplicateEvents++;
+            }
         } else {
             Log.info("[offline] Event: %s", buf);
         }

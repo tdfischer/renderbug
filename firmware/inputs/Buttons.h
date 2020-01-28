@@ -1,4 +1,5 @@
 #pragma once
+#include "../Figments/Input.h"
 
 class Bounce {
 public:
@@ -43,6 +44,10 @@ public:
         return m_state == Confirmed;
     }
 
+    bool held() const {
+        return m_state == Held;
+    }
+
 private:
     enum State {
         Ready,
@@ -59,22 +64,8 @@ private:
 
 class Buttons: public InputSource {
 public:
-    void onStart() override {
-        for(int i = 0; i < 3; i++) {
-            m_buttons[i].attach(2 + i, INPUT_PULLDOWN);
-            m_buttons[i].interval(15);
-        }
-    }
-
-    InputEvent read() override {
-        for(int i = 0; i < 3; i++) {
-            m_buttons[i].update();
-            if (m_buttons[i].fell()) {
-                return InputEvent{m_buttonMap[i]};
-            }
-        }
-        return InputEvent{};
-    }
+    void onStart() override;
+    InputEvent read() override;
 
 private:
     Bounce m_buttons[3];
